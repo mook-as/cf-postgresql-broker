@@ -1,0 +1,29 @@
+# helm install --name postgres --namespace postgres --set persistence.storageClass=persistent stable/postgresql
+# helm install --name pgbroker --namespace postgres --set postgres.host=postgres-postgresql.postgres.svc.cluster.local --set postgres.password="$(kubectl get secret --namespace postgres postgres-postgresql -o jsonpath="{.data.postgres-password}" | base64 --decode)" ./helm/
+# cf create-service-broker cf-postgresql-broker admin changeme http://pgbroker-cf-postgresql-broker.postgres:8080
+---
+postgres:
+  host: ~
+  port: 5432
+  username: postgres
+  password: ~
+  database: postgres
+  sslmode: disable
+broker:
+  username: admin
+  password: changeme
+  replicas: 1
+  services:
+  - id: service-postgresql
+    name: postgres
+    description: DBaaS
+    bindable: true
+    plan_updatable: false
+    plans:
+    - id: plan-basic
+      name: basic
+      description: A basic plan
+image:
+  repository: mookas/cf-postgresql-broker
+  tag: latest
+  pullPolicy: IfNotPresent

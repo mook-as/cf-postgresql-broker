@@ -1,0 +1,48 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  replicas: {{ .Values.broker.replicas }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+          - name: BASIC_AUTH_USERNAME
+            value: {{ required "Broker user name not specified" .Values.broker.username }}
+          - name: BASIC_AUTH_PASSWORD
+            value: {{ required "Broker password not specified" .Values.broker.password }}
+          - name: PG_SOURCE
+            value: "postgresql://{{ required "Database user name not specified" .Values.postgres.username }}:{{ required "Database password not specified" .Values.postgres.password }}@{{ required "Database host name not specified" .Values.postgres.host }}:{{ required "Database host port not specified" .Values.postgres.port }}/{{ required "Database name not specified" .Values.postgres.database }}"
+          - name: PG_SERVICES
+            value: {{ .Values.broker.services | toJson | quote }}
+          - name: PORT
+            value: "8080"
+          - name: VCAP_APPLICATION
+            value: '{"application_name": "{{ .Chart.Name }}" }'
+          - name: PGSSLMODE
+            value: {{ .Values.postgres.sslmode }} 
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /v2/catalog
+            port: 8080
+            httpHeaders:
+            - name: Authorization
+              value: Basic {{ printf "%s:%s" .Values.broker.username .Values.broker.password | b64enc }}
+        readinessProbe:
+          httpGet:
+            path: /v2/catalog
+            port: 8080
+            httpHeaders:
+            - name: Authorization
+              value: Basic {{ printf "%s:%s" .Values.broker.username .Values.broker.password | b64enc }}

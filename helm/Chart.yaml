@@ -1,0 +1,7 @@
+---
+apiVersion: v1
+name: cf-postgresql-broker
+version: 0.1.0
+description: >
+  Cloud Foundry Service Broker implementation for PostgreSQL, as a Helm chart
+  for use with SCF or other fissile-based distributions
