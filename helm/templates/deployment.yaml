@@ -21,7 +21,17 @@ spec:
           - name: BASIC_AUTH_PASSWORD
             value: {{ required "Broker password not specified" .Values.broker.password }}
           - name: PG_SOURCE
-            value: "postgresql://{{ required "Database user name not specified" .Values.postgres.username }}:{{ required "Database password not specified" .Values.postgres.password }}@{{ required "Database host name not specified" .Values.postgres.host }}:{{ required "Database host port not specified" .Values.postgres.port }}/{{ required "Database name not specified" .Values.postgres.database }}"
+            value: >
+              postgresql://
+              {{- required "Database user name not specified" .Values.postgres.username -}}
+              :
+              {{- required "Database password not specified" .Values.postgres.password -}}
+              @
+              {{- required "Database host name not specified" .Values.postgres.host -}}
+              :
+              {{- required "Database host port not specified" .Values.postgres.port -}}
+              /
+              {{- required "Database name not specified" .Values.postgres.database}}
           - name: PG_SERVICES
             value: {{ .Values.broker.services | toJson | quote }}
           - name: PORT
