@@ -1,0 +1,6 @@
+Please register the service broker with Cloud Foundry:
+
+    cf create-service-broker {{ .Chart.Name }} {{ .Values.broker.username }} {{ .Values.broker.password }} http://{{ template "fullname" . }}.{{ .Release.Namespace }}:8080
+    cf enable-service-access <service name>
+
+Then you should see {{ .Chart.Name }} in `cf marketplace`
